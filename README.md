@@ -65,52 +65,48 @@ pip install -r requirements.txt
 
 ### 1. 准备数据
 
-确保你的数据组织如下：
+将你的数据组织成以下结构：
 ```
-project/
-├── images/              # 原始图像文件夹
+root_folder/                 # 根文件夹（任意名称）
+├── Images/                  # 原始图像文件夹（必须命名为Images）
 │   ├── case_001.nii.gz
 │   ├── case_002.nii.gz
 │   └── ...
-├── ground_truth/        # 真实标注（GT）
+├── Labels/                  # 真实标注文件夹（必须命名为Labels）
 │   ├── case_001.nii.gz
 │   ├── case_002.nii.gz
 │   └── ...
-├── model_unet/          # UNet模型预测结果
+├── UNet/                    # 模型1预测结果（文件夹名即为模型名）
 │   ├── case_001.nii.gz
 │   ├── case_002.nii.gz
 │   └── ...
-└── model_resnet/        # ResNet模型预测结果
+├── ResNet/                  # 模型2预测结果
+│   ├── case_001.nii.gz
+│   ├── case_002.nii.gz
+│   └── ...
+└── Transformer/             # 模型3预测结果（可选，最多8个模型）
     ├── case_001.nii.gz
     ├── case_002.nii.gz
     └── ...
 ```
 
-**重要**：所有文件夹中的文件名必须完全相同且一一对应。
+**重要规则**：
+- 根文件夹下必须包含 `Images` 和 `Labels` 两个子文件夹（大小写不敏感）
+- 其他子文件夹会被自动识别为模型预测结果，文件夹名即为模型显示名称
+- 所有文件夹中的文件名必须完全相同且一一对应
+- 最多支持8个模型文件夹（加上Images和Labels共10个）
 
 ### 2. 配置路径
 
-打开 `medical_image_viewer_qt.py`，找到 `main()` 函数，修改配置：
+打开 `medical_image_viewer_qt.py`，找到 `main()` 函数，只需修改一行：
 
 ```python
 def main():
-    # 配置文件夹路径（使用原始字符串 r"..." 避免转义问题）
-    folder_paths = [
-        r"E:\Data\images",              # 第1个：原始图像文件夹
-        r"E:\Data\ground_truth",        # 第2个：真实标注（GT）
-        r"E:\Data\model_unet",          # 第3个：模型1预测结果
-        r"E:\Data\model_resnet",        # 第4个：模型2预测结果
-        # 可以继续添加更多模型，最多10个文件夹
-    ]
+    # 只需修改这一行，指向你的根文件夹
+    root_folder = r"E:\Data\MyProject"  # 修改为你的根文件夹路径
     
-    # 配置对应的显示标签
-    folder_labels = [
-        "Image",        # 原始图像标签
-        "GT",           # 真实标注标签
-        "UNet",         # 模型1标签
-        "ResNet",       # 模型2标签
-        # 对应添加更多标签
-    ]
+    # 其他代码无需修改
+    ...
 ```
 
 ### 3. 运行程序
@@ -118,6 +114,13 @@ def main():
 ```bash
 python medical_image_viewer_qt.py
 ```
+
+程序会自动：
+1. 扫描根文件夹下的所有子文件夹
+2. 识别 `Images` 和 `Labels` 文件夹
+3. 将其他文件夹作为模型预测结果
+4. 按字母顺序显示模型
+5. 在控制台输出检测到的文件夹信息
 
 ## 操作指南
 
@@ -149,6 +152,11 @@ python medical_image_viewer_qt.py
 - 特点：对拓扑结构敏感，比普通Dice更适合血管分割评估
 
 ## 配置说明
+
+### 文件夹命名规则
+- `Images` 或 `images`：原始图像文件夹（必需）
+- `Labels` 或 `labels`：真实标注文件夹（必需）
+- 其他任意名称：模型预测结果文件夹（文件夹名即为显示的模型名）
 
 ### 文件夹数量限制
 - 最少：2个（原始图像 + GT）
